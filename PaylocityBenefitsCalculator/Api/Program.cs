@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using WebApplication1.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,11 @@ builder.Services.AddSwaggerGen(c => {
         Title = "Employee Benefit Cost Calculation Api",
         Description = "Api to support employee benefit cost calculations"
     });
+});
+
+builder.Services.AddDbContext<PayrollDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("PayrollDbConnection"));
 });
 
 var allowLocalhost = "allow localhost";
