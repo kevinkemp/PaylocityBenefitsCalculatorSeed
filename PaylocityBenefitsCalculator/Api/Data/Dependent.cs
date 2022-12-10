@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApplication1.Data
+namespace Api.Data
 {
     public class Dependent
     {
@@ -20,7 +20,7 @@ namespace WebApplication1.Data
         public int EmployeeId { get; set; }
 
         [ForeignKey("EmployeeId")]
-        public virtual Employee Employee { get; set; }
+        public virtual Employee Employee { get; set; } = null!;
     }
 
     public enum RelationshipType

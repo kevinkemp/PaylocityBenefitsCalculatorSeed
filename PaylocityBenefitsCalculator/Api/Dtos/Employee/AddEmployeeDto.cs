@@ -9,5 +9,6 @@ namespace Api.Dtos.Employee
         public decimal Salary { get; set; }
         public DateTime DateOfBirth { get; set; }
         public ICollection<AddDependentDto>? Dependents { get; set; }
+        public string? SalaryNote { get; set; }        
     }
 }

@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using WebApplication1.Data;
+using Api.Data;
+using Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {
@@ -23,6 +25,10 @@ builder.Services.AddDbContext<PayrollDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("PayrollDbConnection"));
 });
+
+//SHOULD THESE BE SINGLETONS? TRANSIENTS?
+builder.Services.AddSingleton<IDependentsService, DependentsService>();
+builder.Services.AddSingleton<IEmployeesService, EmployeesService>();
 
 var allowLocalhost = "allow localhost";
 builder.Services.AddCors(options =>

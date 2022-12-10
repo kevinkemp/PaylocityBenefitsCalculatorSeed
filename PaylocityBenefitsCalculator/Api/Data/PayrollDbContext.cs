@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace WebApplication1.Data
+namespace Api.Data
 {
     public class PayrollDbContext : DbContext
     {
@@ -16,8 +16,7 @@ namespace WebApplication1.Data
 
         public DbSet<Paycheck> Paychecks { get; set; }
 
-        public DbSet<TimePeriod> TimePeriods { get; set; }
-
-        public DbSet<Salary> Salaries { get; set; }
+        //could have TimePeriods table where admin can set different start, end and paydates
+        //public DbSet<TimePeriod> TimePeriods { get; set; }
     }
 }

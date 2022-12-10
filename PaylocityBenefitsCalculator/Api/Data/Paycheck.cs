@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebApplication1.Data
+namespace Api.Data
 {
     public class Paycheck
     {
@@ -21,15 +21,18 @@ namespace WebApplication1.Data
         [Precision(18, 2)]
         public decimal NetPay { get; set; }
 
+        [Required]
+        public DateTime StartDate { get; set; }
+
+        [Required]
+        public DateTime EndDate { get; set; }
+
+        [Required]
+        public DateTime PayDate { get; set; }
 
         public int EmployeeId { get; set; }
 
         [ForeignKey("EmployeeId")]
-        public virtual Employee Employee { get; set; }
-
-        public int PeriodId { get; set; }
-
-        [ForeignKey("PeriodId")]
-        public virtual TimePeriod Period { get; set; }
+        public virtual Employee Employee { get; set; } = null!;
     }
 }
