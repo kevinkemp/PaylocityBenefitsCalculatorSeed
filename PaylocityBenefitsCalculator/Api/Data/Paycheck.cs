@@ -17,31 +17,36 @@ namespace Api.Data
         [Precision(18, 2)]
         public decimal TotalDeductions { get; set; }
 
+
+        //DO I NEED MONTHLY BASE DEDUCTION HERE?
         [Required]
         [Precision(18, 2)]
-        public decimal MonthlyBaseDeduction { get; set; }
+        public decimal MonthlyBaseDeductionPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal DeductionsPerDependent { get; set; }
+        public decimal DeductionsPerDependentPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal AdditionalAnnualDeduction { get; set; }
+        public decimal AdditionalAnnualDeductionPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal AdditionalDeductionPerDependent { get; set; }
+        public decimal AdditionalDeductionPerDependentPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal NetPay { get; set; }
+        public decimal NetPayPerPaycheck { get; set; }
 
         [Required]
         public DateTime StartDate { get; set; }
 
         [Required]
         public DateTime PayDate { get; set; }
+
+        //maybe not needed!!
+        //public bool Paid { get; set; }
 
         public int EmployeeId { get; set; }
 

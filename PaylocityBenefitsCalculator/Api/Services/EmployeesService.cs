@@ -213,6 +213,9 @@ namespace Api.Services
             }
 
             context.Employees.Remove(employee);
+
+            //DO I HAVE TO DELETE PAYCHECKS TOO?
+
             await context.SaveChangesAsync();
 
             var dto = new GetEmployeeDto
@@ -267,13 +270,13 @@ namespace Api.Services
             };
 
             //this 80k should be an enum or constant in a shared
-            if (newEmployee.Salary > 80000)
+            if (newEmployee.Salary > 80_000.0m)
                 addEmp.IncursAdditionalAnnualCost = true;
 
             context.Employees.Add(addEmp);
             await context.SaveChangesAsync();
 
-            await _paycheckService.GeneratePaychecksForEmployeeId(addEmp.EmployeeId);
+            
 
             //MAYBE THIS LOGIC IN CONTROLLER?
             if (newEmployee.Dependents != null)
@@ -304,6 +307,11 @@ namespace Api.Services
                         return error;
                     }
                 }
+            }
+            //when you add a dependent it regenerates paychecks, this else prevents hitting that method twice(once when adding dependent, again after adding employee)
+            else
+            {
+                await _paycheckService.GeneratePaychecksForEmployeeId(addEmp.EmployeeId);
             }
 
             var response = new ApiResponse<AddEmployeeDto>

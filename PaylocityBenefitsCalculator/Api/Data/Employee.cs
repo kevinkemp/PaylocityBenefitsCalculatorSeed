@@ -24,6 +24,8 @@ namespace Api.Data
 
         //could add Active bool, maybe employee terminated
 
+        //could add a more unique identifier like SSN to prevent dupes
+
         //SHOULD I REMOVE VIRTUALS? DO I NEED LAZY LOADING?
         public virtual List<Dependent>? Dependents { get; set; }
         public virtual List<Paycheck>? Paychecks { get; set; }

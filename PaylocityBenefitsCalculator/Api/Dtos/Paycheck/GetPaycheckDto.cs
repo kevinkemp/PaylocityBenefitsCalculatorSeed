@@ -17,23 +17,23 @@ namespace Api.Dtos.Paycheck
 
         [Required]
         [Precision(18, 2)]
-        public decimal MonthlyBaseDeduction { get; set; }
+        public decimal MonthlyBaseDeductionPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal DeductionsPerDependent { get; set; }
+        public decimal DeductionsPerDependentPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal AdditionalAnnualDeduction { get; set; }
+        public decimal AdditionalAnnualDeductionPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal AdditionalDeductionPerDependent { get; set; }
+        public decimal AdditionalDeductionPerDependentPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal NetPay { get; set; }
+        public decimal NetPayPerPaycheck { get; set; }
 
         [Required]
         public DateTime StartDate { get; set; }

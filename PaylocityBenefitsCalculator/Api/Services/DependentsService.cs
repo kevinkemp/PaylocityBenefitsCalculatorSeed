@@ -101,6 +101,30 @@ namespace Api.Services
             var context = scope.ServiceProvider
                 .GetRequiredService<PayrollDbContext>();
 
+            if(newDependent.Relationship == RelationshipType.Spouse || newDependent.Relationship == RelationshipType.DomesticPartner)
+            {
+                //find if employee already has a domestic partner or spouse
+                var getSpouseOrDomesticPartner = await context.Dependents
+                    .Where(d => d.EmployeeId == newDependent.EmployeeId && 
+                        d.Relationship == RelationshipType.Spouse || 
+                        d.Relationship == RelationshipType.DomesticPartner)
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync();
+
+                if(getSpouseOrDomesticPartner != null)
+                {
+                    var error = new ApiResponse<AddDependentWithEmployeeIdDto>
+                    {
+                        Data = null,
+                        Success = false,
+                        Message = $"Employee Id {newDependent.EmployeeId} already has a Spouse or Domestic Partner",
+                        Error = "404"
+                    };
+
+                    return error;
+                }
+            }
+
             var addDependent = new Dependent
             {
                 EmployeeId = newDependent.EmployeeId,

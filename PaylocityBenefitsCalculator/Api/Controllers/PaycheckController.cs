@@ -27,7 +27,7 @@ namespace Api.Controllers
         }
 
         [SwaggerOperation(Summary = "Get all paychecks for Employee Id")]
-        [HttpGet("{id}")]
+        [HttpGet("/All/{id}")]
         public async Task<ActionResult<ApiResponse<List<GetPaycheckDto>>>> GetAllByEmployeeId(int id)
         {
             var response = await _paycheckService.GetPaychecksByEmployeeId(id);

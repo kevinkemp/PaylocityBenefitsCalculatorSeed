@@ -31,11 +31,11 @@ namespace Api.Services
                     PaycheckId = p.PaycheckId,
                     GrossPay = p.GrossPay,
                     TotalDeductions = p.TotalDeductions,
-                    MonthlyBaseDeduction = p.MonthlyBaseDeduction,
-                    DeductionsPerDependent = p.DeductionsPerDependent,
-                    AdditionalAnnualDeduction = p.AdditionalAnnualDeduction,
-                    AdditionalDeductionPerDependent = p.AdditionalDeductionPerDependent,
-                    NetPay = p.NetPay,
+                    MonthlyBaseDeductionPerPaycheck = p.MonthlyBaseDeductionPerPaycheck,
+                    DeductionsPerDependentPerPaycheck = p.DeductionsPerDependentPerPaycheck,
+                    AdditionalAnnualDeductionPerPaycheck = p.AdditionalAnnualDeductionPerPaycheck,
+                    AdditionalDeductionPerDependentPerPaycheck = p.AdditionalDeductionPerDependentPerPaycheck,
+                    NetPayPerPaycheck = p.NetPayPerPaycheck,
                     StartDate = p.StartDate,
                     PayDate = p.PayDate,
                     EmployeeId = p.PaycheckId
@@ -66,14 +66,14 @@ namespace Api.Services
                     PaycheckId = p.PaycheckId,
                     GrossPay = p.GrossPay,
                     TotalDeductions = p.TotalDeductions,
-                    MonthlyBaseDeduction = p.MonthlyBaseDeduction,
-                    DeductionsPerDependent = p.DeductionsPerDependent,
-                    AdditionalAnnualDeduction = p.AdditionalAnnualDeduction,
-                    AdditionalDeductionPerDependent = p.AdditionalDeductionPerDependent,
-                    NetPay = p.NetPay,
+                    MonthlyBaseDeductionPerPaycheck = p.MonthlyBaseDeductionPerPaycheck,
+                    DeductionsPerDependentPerPaycheck = p.DeductionsPerDependentPerPaycheck,
+                    AdditionalAnnualDeductionPerPaycheck = p.AdditionalAnnualDeductionPerPaycheck,
+                    AdditionalDeductionPerDependentPerPaycheck = p.AdditionalDeductionPerDependentPerPaycheck,
+                    NetPayPerPaycheck = p.NetPayPerPaycheck,
                     StartDate = p.StartDate,
                     PayDate = p.PayDate,
-                    EmployeeId = p.PaycheckId
+                    EmployeeId = p.EmployeeId
                 })
                 .ToListAsync();
 
@@ -100,14 +100,14 @@ namespace Api.Services
                     PaycheckId = p.PaycheckId,
                     GrossPay = p.GrossPay,
                     TotalDeductions = p.TotalDeductions,
-                    MonthlyBaseDeduction = p.MonthlyBaseDeduction,
-                    DeductionsPerDependent = p.DeductionsPerDependent,
-                    AdditionalAnnualDeduction = p.AdditionalAnnualDeduction,
-                    AdditionalDeductionPerDependent = p.AdditionalDeductionPerDependent,
-                    NetPay = p.NetPay,
+                    MonthlyBaseDeductionPerPaycheck = p.MonthlyBaseDeductionPerPaycheck,
+                    DeductionsPerDependentPerPaycheck = p.DeductionsPerDependentPerPaycheck,
+                    AdditionalAnnualDeductionPerPaycheck = p.AdditionalAnnualDeductionPerPaycheck,
+                    AdditionalDeductionPerDependentPerPaycheck = p.AdditionalDeductionPerDependentPerPaycheck,
+                    NetPayPerPaycheck = p.NetPayPerPaycheck,
                     StartDate = p.StartDate,
                     PayDate = p.PayDate,
-                    EmployeeId = p.PaycheckId
+                    EmployeeId = p.EmployeeId
                 })
                 .ToListAsync();
 
@@ -159,7 +159,7 @@ namespace Api.Services
             }
 
             //generate new paychecks
-            decimal baseCost = DeductBaseCost(employee.Salary);
+            decimal baseCost = DeductBaseCost();
             decimal additionalAnnualCost = 0;
             decimal dependentsCost = 0;
             decimal additionalDependentsCost = 0;
@@ -176,24 +176,26 @@ namespace Api.Services
 
             var totalDeductions = baseCost + additionalAnnualCost + additionalDependentsCost + dependentsCost;
 
+
+            //all the foillowing 26s should be in settings
             var paycheckBase = new Paycheck
             {
                 GrossPay = employee.Salary,
                 EmployeeId = id,
                 TotalDeductions = totalDeductions,
-                MonthlyBaseDeduction = baseCost / 26,
-                NetPay = employee.Salary - totalDeductions
+                MonthlyBaseDeductionPerPaycheck = baseCost / 26,
+                NetPayPerPaycheck = (employee.Salary - totalDeductions) / 26
             };
 
             //careful with 0/26
             if (dependentsCost > 0)
-                paycheckBase.DeductionsPerDependent = dependentsCost / 26;
+                paycheckBase.DeductionsPerDependentPerPaycheck = dependentsCost / 26;
 
             if (additionalAnnualCost > 0)
-                paycheckBase.AdditionalAnnualDeduction = additionalAnnualCost / 26;
+                paycheckBase.AdditionalAnnualDeductionPerPaycheck = additionalAnnualCost / 26;
 
             if (additionalDependentsCost > 0)
-                paycheckBase.AdditionalDeductionPerDependent = additionalDependentsCost / 26;
+                paycheckBase.AdditionalDeductionPerDependentPerPaycheck = additionalDependentsCost / 26;
 
             //couldve used DTO here
             //eventually would be nice for admin to set startDate and endDate from gui
@@ -202,6 +204,8 @@ namespace Api.Services
             var newPaychecks = GenerateNewPaychecks(paycheckBase, startDate);
 
             await context.Paychecks.AddRangeAsync(newPaychecks);
+
+            await context.SaveChangesAsync();
 
             var paycheckIds = newPaychecks
                 .Select(np => np.PaycheckId)
@@ -223,10 +227,10 @@ namespace Api.Services
         }
 
         //ILL BE ASKED WHY STATIC? dont access instance data
-        private static decimal DeductBaseCost(decimal baseSalary)
+        private static decimal DeductBaseCost()
         {
-            //this 12000 should be an enum that can be calculated, in case base cost per employee changes
-            return baseSalary - 12000;
+            //this 1000 value should be an enum that can be calculated, in case base cost per employee changes
+            return 1000 * 12;
         }
 
         private static decimal DeductDependentsCost(int amountOfDependents)
@@ -266,8 +270,11 @@ namespace Api.Services
                     GrossPay = paycheckBase.GrossPay,
                     EmployeeId = paycheckBase.EmployeeId,
                     TotalDeductions = paycheckBase.TotalDeductions,
-                    MonthlyBaseDeduction = paycheckBase.MonthlyBaseDeduction,
-                    NetPay = paycheckBase.NetPay,
+                    MonthlyBaseDeductionPerPaycheck = paycheckBase.MonthlyBaseDeductionPerPaycheck,
+                    NetPayPerPaycheck = paycheckBase.NetPayPerPaycheck,
+                    DeductionsPerDependentPerPaycheck = paycheckBase.DeductionsPerDependentPerPaycheck,
+                    AdditionalAnnualDeductionPerPaycheck = paycheckBase.AdditionalAnnualDeductionPerPaycheck,
+                    AdditionalDeductionPerDependentPerPaycheck = paycheckBase.AdditionalDeductionPerDependentPerPaycheck,
                     StartDate = startDate,
                     PayDate = startDate.AddDays(14)
                 };
