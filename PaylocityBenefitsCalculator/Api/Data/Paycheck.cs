@@ -11,12 +11,11 @@ namespace Api.Data
 
         [Required]
         [Precision(18, 2)]
-        public decimal GrossPay { get; set; }
+        public decimal GrossPayPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal TotalDeductions { get; set; }
-
+        public decimal TotalDeductionsPerPaycheck { get; set; }
 
         //DO I NEED MONTHLY BASE DEDUCTION HERE?
         [Required]
@@ -29,7 +28,7 @@ namespace Api.Data
 
         [Required]
         [Precision(18, 2)]
-        public decimal AdditionalAnnualDeductionPerPaycheck { get; set; }
+        public decimal AdditionalYearlyDeductionPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]

@@ -152,7 +152,7 @@ namespace Api.Services
 
             //this 80k should be an enum or constant in a shared
             if (employee.Salary > 80000)
-                employee.IncursAdditionalAnnualCost = true;
+                employee.IncursAdditionalYearlyCost = true;
 
             await context.SaveChangesAsync();
 
@@ -271,7 +271,7 @@ namespace Api.Services
 
             //this 80k should be an enum or constant in a shared
             if (newEmployee.Salary > 80_000.0m)
-                addEmp.IncursAdditionalAnnualCost = true;
+                addEmp.IncursAdditionalYearlyCost = true;
 
             context.Employees.Add(addEmp);
             await context.SaveChangesAsync();

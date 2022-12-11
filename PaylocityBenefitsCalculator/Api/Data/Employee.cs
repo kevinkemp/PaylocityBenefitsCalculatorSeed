@@ -20,7 +20,7 @@ namespace Api.Data
         [Precision(18, 2)]
         public decimal Salary { get; set; }
 
-        public bool IncursAdditionalAnnualCost { get; set; }
+        public bool IncursAdditionalYearlyCost { get; set; }
 
         //could add Active bool, maybe employee terminated
 

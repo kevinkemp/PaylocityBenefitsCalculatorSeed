@@ -27,6 +27,7 @@ builder.Services.AddDbContext<PayrollDbContext>(options =>
 });
 
 //SHOULD THESE BE SINGLETONS? TRANSIENTS?
+builder.Services.AddSingleton<ICalculatorService, CalculatorService>();
 builder.Services.AddSingleton<IPaycheckService, PaycheckService>();
 builder.Services.AddSingleton<IDependentsService, DependentsService>();
 builder.Services.AddSingleton<IEmployeesService, EmployeesService>();

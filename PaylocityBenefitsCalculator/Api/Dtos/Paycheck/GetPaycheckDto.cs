@@ -9,11 +9,11 @@ namespace Api.Dtos.Paycheck
 
         [Required]
         [Precision(18, 2)]
-        public decimal GrossPay { get; set; }
+        public decimal GrossPayPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
-        public decimal TotalDeductions { get; set; }
+        public decimal TotalDeductionsPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
@@ -25,7 +25,7 @@ namespace Api.Dtos.Paycheck
 
         [Required]
         [Precision(18, 2)]
-        public decimal AdditionalAnnualDeductionPerPaycheck { get; set; }
+        public decimal AdditionalYearlyDeductionPerPaycheck { get; set; }
 
         [Required]
         [Precision(18, 2)]
