@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Data
 {
@@ -20,6 +19,10 @@ namespace Api.Data
 
         [Precision(18, 2)]
         public decimal Salary { get; set; }
+
+        public bool IncursAdditionalAnnualCost { get; set; }
+
+        //could add Active bool, maybe employee terminated
 
         //SHOULD I REMOVE VIRTUALS? DO I NEED LAZY LOADING?
         public virtual List<Dependent>? Dependents { get; set; }

@@ -7,7 +7,9 @@ namespace Api.Data
     {
         [Key]
         public int DependentId { get; set; }
+
         public string? FirstName { get; set; }
+
         public string? LastName { get; set; }
 
         [Required]

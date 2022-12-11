@@ -11,11 +11,13 @@ namespace Api.Services
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IDependentsService _dependentsService;
+        private readonly IPaycheckService _paycheckService;
 
-        public EmployeesService(IServiceScopeFactory scopeFactory, IDependentsService dependentsService)
+        public EmployeesService(IServiceScopeFactory scopeFactory, IDependentsService dependentsService, IPaycheckService paycheckService)
         {
             _scopeFactory = scopeFactory;
             _dependentsService = dependentsService;
+            _paycheckService = paycheckService;
         }
 
         public async Task<ApiResponse<GetEmployeeDto>> Get(int id)
@@ -64,18 +66,6 @@ namespace Api.Services
 
             };
 
-            //if (employee.Dependents != null)
-            //{
-            //    dto.Dependents = employee.Dependents.Select(d => new GetDependentDto
-            //    {
-            //        Id = d.DependentId,
-            //        FirstName = d.FirstName,
-            //        LastName = d.LastName,
-            //        DateOfBirth = d.DateOfBirth,
-            //        Relationship = (Relationship)d.Relationship
-            //    }).ToList();
-            //}
-
             var response = new ApiResponse<GetEmployeeDto>
             {
                 Data = dto,
@@ -109,7 +99,7 @@ namespace Api.Services
                 LastName = e.LastName,
                 Salary = e.Salary,
                 DateOfBirth = e.DateOfBirth,
-                Dependents = e.Dependents? 
+                Dependents = e.Dependents?
                 .Select(d => new GetDependentDto
                 {
                     Id = d.DependentId,
@@ -155,12 +145,20 @@ namespace Api.Services
                 return error;
             }
 
+            //could add checks if modified then update, if not ignore
             employee.FirstName = updatedEmployee.FirstName;
             employee.LastName = updatedEmployee.LastName;
             employee.Salary = updatedEmployee.Salary;
 
-            //RECALCULATE PAYCHECKS HER
+            //this 80k should be an enum or constant in a shared
+            if (employee.Salary > 80000)
+                employee.IncursAdditionalAnnualCost = true;
+
             await context.SaveChangesAsync();
+
+            //if salary was updated, recalculate paychecks, if added checks in ln 148 could add this logic there
+            if (employee.Salary != updatedEmployee.Salary)
+                await _paycheckService.GeneratePaychecksForEmployeeId(id);
 
             var dto = new GetEmployeeDto
             {
@@ -197,10 +195,7 @@ namespace Api.Services
             var context = scope.ServiceProvider
                 .GetRequiredService<PayrollDbContext>();
 
-            //DO I HAVE TO INCLUDE HERE?
             var employee = await context.Employees
-                //.Include(e => e.Dependents)
-                //.Include(e => e.Salary)
                 .Where(e => e.EmployeeId == id)
                 .FirstOrDefaultAsync();
 
@@ -231,7 +226,7 @@ namespace Api.Services
             };
 
             var response = new ApiResponse<GetEmployeeDto>
-            {   
+            {
                 Data = dto,
                 Success = true
             };
@@ -271,13 +266,19 @@ namespace Api.Services
                 Salary = newEmployee.Salary
             };
 
+            //this 80k should be an enum or constant in a shared
+            if (newEmployee.Salary > 80000)
+                addEmp.IncursAdditionalAnnualCost = true;
+
             context.Employees.Add(addEmp);
             await context.SaveChangesAsync();
+
+            await _paycheckService.GeneratePaychecksForEmployeeId(addEmp.EmployeeId);
 
             //MAYBE THIS LOGIC IN CONTROLLER?
             if (newEmployee.Dependents != null)
             {
-                foreach(var dependent in newEmployee.Dependents)
+                foreach (var dependent in newEmployee.Dependents)
                 {
                     var newDependent = new AddDependentWithEmployeeIdDto
                     {
@@ -290,7 +291,7 @@ namespace Api.Services
 
                     var dependentServiceResponse = await _dependentsService.AddDependent(newDependent);
 
-                    if(dependentServiceResponse.Success == false) 
+                    if (dependentServiceResponse.Success == false)
                     {
                         var error = new ApiResponse<AddEmployeeDto>
                         {

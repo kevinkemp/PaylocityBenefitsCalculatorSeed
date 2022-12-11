@@ -12,7 +12,8 @@ namespace Api.Data
 
         public DbSet<Dependent> Dependents { get; set; }
 
-        public DbSet<Deduction> Deductions { get; set; }
+        //could have table with deductions and set values (for example $200 per dependent), allow admin to add more deduction values or edit them
+        //public DbSet<Deduction> Deductions { get; set; }
 
         public DbSet<Paycheck> Paychecks { get; set; }
 

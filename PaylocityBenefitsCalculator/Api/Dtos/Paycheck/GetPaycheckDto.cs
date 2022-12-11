@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Api.Data
+namespace Api.Dtos.Paycheck
 {
-    public class Paycheck
+    public class GetPaycheckDto
     {
-        [Key]
         public int PaycheckId { get; set; }
 
         [Required]
@@ -44,8 +42,5 @@ namespace Api.Data
         public DateTime PayDate { get; set; }
 
         public int EmployeeId { get; set; }
-
-        [ForeignKey("EmployeeId")]
-        public virtual Employee Employee { get; set; } = null!;
     }
 }

@@ -29,6 +29,7 @@ builder.Services.AddDbContext<PayrollDbContext>(options =>
 //SHOULD THESE BE SINGLETONS? TRANSIENTS?
 builder.Services.AddSingleton<IDependentsService, DependentsService>();
 builder.Services.AddSingleton<IEmployeesService, EmployeesService>();
+builder.Services.AddSingleton<IPaycheckService, PaycheckService>();
 
 var allowLocalhost = "allow localhost";
 builder.Services.AddCors(options =>
