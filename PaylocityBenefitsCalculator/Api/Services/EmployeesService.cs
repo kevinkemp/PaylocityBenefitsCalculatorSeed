@@ -158,9 +158,10 @@ namespace Api.Services
             employee.LastName = updatedEmployee.LastName;
             employee.Salary = updatedEmployee.Salary;
 
-            //this 80k should be an enum or constant in a shared
-            if (employee.Salary > 80000)
+            if (employee.Salary > Constants.CalculatorValues.MinimumBaseSalaryToIncurAdditionalCost)
                 employee.IncursAdditionalYearlyCost = true;
+            else
+                employee.IncursAdditionalYearlyCost = false;
 
             await context.SaveChangesAsync();
 
@@ -222,8 +223,6 @@ namespace Api.Services
 
             context.Employees.Remove(employee);
 
-            //DO I HAVE TO DELETE PAYCHECKS TOO?
-
             await context.SaveChangesAsync();
 
             var dto = new GetEmployeeDto
@@ -260,14 +259,12 @@ namespace Api.Services
                 Salary = newEmployee.Salary
             };
 
-            //this 80k should be an enum or constant in a shared
-            if (newEmployee.Salary > 80_000.0m)
+            if (newEmployee.Salary > Constants.CalculatorValues.MinimumBaseSalaryToIncurAdditionalCost)
                 addEmp.IncursAdditionalYearlyCost = true;
 
             context.Employees.Add(addEmp);
             await context.SaveChangesAsync();
 
-            //MAYBE THIS LOGIC IN CONTROLLER?
             if (newEmployee.Dependents != null)
             {
                 foreach (var dependent in newEmployee.Dependents)
@@ -311,33 +308,5 @@ namespace Api.Services
 
             return response;
         }
-
-        //SHOULD THIS BE STATIC? IS THIS NEEDED IF IM DOING VALIDATIONS AT MODEL LEVEL?
-        //private static AddEmployeeValidationResult ValidateNewEmployee(AddEmployeeDto newEmployee)
-        //{
-        //    var res = new AddEmployeeValidationResult()
-        //    {
-        //        Valid = true,
-        //    };
-
-        //    var age = DateTime.Today.Year - newEmployee.DateOfBirth.Year;
-
-        //    if (string.IsNullOrEmpty(newEmployee.FirstName))
-        //        res.Fields.Add(nameof(newEmployee.FirstName));
-
-        //    if (string.IsNullOrEmpty(newEmployee.LastName))
-        //        res.Fields.Add(nameof(newEmployee.LastName));
-
-        //    if (newEmployee.Salary < 0)
-        //        res.Fields.Add(nameof(newEmployee.Salary));
-
-        //    if (age <= 17 )
-        //        res.Fields.Add(nameof(newEmployee.DateOfBirth));
-
-        //    if (res.Fields.Any())
-        //        res.Valid = false;
-
-        //    return res;
-        //}
     }
 }
