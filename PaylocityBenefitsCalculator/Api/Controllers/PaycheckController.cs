@@ -3,6 +3,7 @@ using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 
 namespace Api.Controllers
 {
@@ -23,14 +24,28 @@ namespace Api.Controllers
         {
             var response = await _paycheckService.GetPaycheck(id);
 
+            if (response.Success == false)
+            {
+                var statusCode = Constants.ErrorDictionary.GetHttpError()[response.Error];
+
+                return HttpErrorGenerator(statusCode, response.Message);
+            }
+
             return response;
         }
 
         [SwaggerOperation(Summary = "Get all paychecks for Employee Id")]
-        [HttpGet("/All/{id}")]
+        [HttpGet("/EmployeeId/{id}")]
         public async Task<ActionResult<ApiResponse<List<GetPaycheckDto>>>> GetAllByEmployeeId(int id)
         {
             var response = await _paycheckService.GetPaychecksByEmployeeId(id);
+
+            if (response.Success == false)
+            {
+                var statusCode = Constants.ErrorDictionary.GetHttpError()[response.Error];
+
+                return HttpErrorGenerator(statusCode, response.Message);
+            }
 
             return response;
         }
@@ -41,7 +56,25 @@ namespace Api.Controllers
         {
             var response = await _paycheckService.GetAll();
 
+            if (response.Success == false)
+            {
+                var statusCode = Constants.ErrorDictionary.GetHttpError()[response.Error];
+
+                return HttpErrorGenerator(statusCode, response.Message);
+            }
+
             return response;
+        }
+
+        private ObjectResult HttpErrorGenerator(HttpStatusCode statusCode, string errorMessage)
+        {
+            if (statusCode == HttpStatusCode.BadRequest)
+                return BadRequest(new { message = errorMessage });
+
+            if (statusCode == HttpStatusCode.NotFound)
+                return NotFound(new { message = errorMessage });
+
+            return Problem(errorMessage);
         }
     }
 }

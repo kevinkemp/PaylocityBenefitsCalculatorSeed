@@ -7,6 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using Api.Data;
 using Api.Services;
 using System.Net;
+using Azure;
 
 namespace Api.Controllers
 {
@@ -29,15 +30,11 @@ namespace Api.Controllers
 
             if (response.Success == false)
             {
-                if (Enum.TryParse(response.Error, out HttpStatusCode statusCode))
-                {
-                    switch (statusCode)
-                    {
-                        case HttpStatusCode.NotFound:
-                            return EmployeeNotFound(response.Message);
-                    }
-                }
+                var statusCode = Constants.ErrorDictionary.GetHttpError()[response.Error];
+
+                return HttpErrorGenerator(statusCode, response.Message);
             }
+
             return response;
         }
 
@@ -54,26 +51,16 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<AddEmployeeDto>>> AddEmployee(AddEmployeeDto newEmployee)
         {
-            var addEmployeeResponse = await _employeeService.AddEmployee(newEmployee);
+            var response = await _employeeService.AddEmployee(newEmployee);
 
-            if (addEmployeeResponse.Success == false)
+            if (response.Success == false)
             {
-                //FIX THESE ERRORS!!
-                //HttpStatusCode statusCode;
+                var statusCode = Constants.ErrorDictionary.GetHttpError()[response.Error];
 
-
-                
-                //if (Enum.TryParse(addEmployeeResult.Error, out statusCode))
-                //{
-                //    switch (statusCode)
-                //    {
-                //        case HttpStatusCode.NotFound:
-                //            return EmployeeNotFound(addEmployeeResult.Message);
-                //    }
-                //}
+                return HttpErrorGenerator(statusCode, response.Message);
             }
 
-            return addEmployeeResponse;
+            return response;
 
         }
 
@@ -81,23 +68,43 @@ namespace Api.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> UpdateEmployee(int id, UpdateEmployeeDto updatedEmployee)
         {
-            var updateEmployeeResponse = await _employeeService.UpdateEmployee(id, updatedEmployee);
+            var response = await _employeeService.UpdateEmployee(id, updatedEmployee);
 
-            return updateEmployeeResponse;
+            if (response.Success == false)
+            {
+                var statusCode = Constants.ErrorDictionary.GetHttpError()[response.Error];
+
+                return HttpErrorGenerator(statusCode, response.Message);
+            }
+
+            return response;
         }
 
         [SwaggerOperation(Summary = "Delete employee")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> DeleteEmployee(int id)
         {
-            var deleteEmployeeResponse = await _employeeService.DeleteEmployee(id);
+            var response = await _employeeService.DeleteEmployee(id);
 
-            return deleteEmployeeResponse;
+            if (response.Success == false)
+            {
+                var statusCode = Constants.ErrorDictionary.GetHttpError()[response.Error];
+
+                return HttpErrorGenerator(statusCode, response.Message);
+            }
+
+            return response;
         }
 
-        private NotFoundObjectResult EmployeeNotFound(string errorMessage)
+        private ObjectResult HttpErrorGenerator(HttpStatusCode statusCode, string errorMessage)
         {
-            return NotFound(new { message = errorMessage });
+            if (statusCode == HttpStatusCode.BadRequest)
+                return BadRequest(new { message = errorMessage });
+
+            if (statusCode == HttpStatusCode.NotFound)
+                return NotFound(new { message = errorMessage });
+
+            return Problem(errorMessage);
         }
     }
 }

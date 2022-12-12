@@ -44,11 +44,20 @@ namespace Api.Services
                 })
                 .SingleOrDefaultAsync();
 
-            var response = new ApiResponse<GetPaycheckDto>
+            var response = new ApiResponse<GetPaycheckDto>();
+
+            if(paycheck == null)
             {
-                Data = paycheck,
-                Success = true
-            };
+                response.Data = null; //DO I NEED THIS????
+                response.Success = false;
+                response.Message = $"Paycheck with Id {id} not found";
+                response.Error = Constants.ErrorCode.PaycheckNotFound;
+
+                return response;
+            }
+
+            response.Success = true;
+            response.Data = paycheck;
 
             return response;
         }
@@ -78,11 +87,20 @@ namespace Api.Services
                 })
                 .ToListAsync();
 
-            var response = new ApiResponse<List<GetPaycheckDto>>
+            var response = new ApiResponse<List<GetPaycheckDto>>();
+
+            if (!paychecks.Any())
             {
-                Data = paychecks,
-                Success = true
-            };
+                response.Data = null; //DO I NEED THIS????
+                response.Success = false;
+                response.Message = $"No Paychecks found.";
+                response.Error = Constants.ErrorCode.PaycheckNotFound;
+
+                return response;
+            }
+
+            response.Success = true;
+            response.Data = paychecks;
 
             return response;
         }
@@ -112,11 +130,20 @@ namespace Api.Services
                 })
                 .ToListAsync();
 
-            var response = new ApiResponse<List<GetPaycheckDto>>
+            var response = new ApiResponse<List<GetPaycheckDto>>();
+
+            if (!paychecks.Any())
             {
-                Data = paychecks,
-                Success = true
-            };
+                response.Data = null; //DO I NEED THIS????
+                response.Success = false;
+                response.Message = $"No Paychecks found.";
+                response.Error = Constants.ErrorCode.PaycheckNotFound;
+
+                return response;
+            }
+
+            response.Success = true;
+            response.Data = paychecks;
 
             return response;
         }
@@ -141,7 +168,7 @@ namespace Api.Services
                     Data = null,
                     Success = false,
                     Message = $"Employee with Id: {id} does not exist.",
-                    Error = "404"
+                    Error = Constants.ErrorCode.EmployeeNotFound
                 };
 
                 return error;
@@ -190,8 +217,8 @@ namespace Api.Services
             //generate paychecks for a year, nice-to-have: specify a year
             var paychecksForYear = _calculatorService.GeneratePaychecksForYear(basePaycheckDto);
 
+            //save new paychecks
             await context.Paychecks.AddRangeAsync(paychecksForYear);
-
             await context.SaveChangesAsync();
 
             var paycheckIds = paychecksForYear
@@ -217,10 +244,11 @@ namespace Api.Services
         {
             basePaycheckDto.BaseCostPerYear = _calculatorService.GetBaseCostPerYear();
 
+            //only do these calculations if i have to
             if (basePaycheckDto.IncursAdditionalYearlyCost)
                 basePaycheckDto.AdditionalYearlyCostByPercentage = _calculatorService.GetAdditionalYearlyCostByPercentage(basePaycheckDto.BaseSalary);
 
-            if (basePaycheckDto.NumberOfDependents > 0)
+            if (basePaycheckDto.NumberOfDependents > 0) 
                 basePaycheckDto.DependentsBaseCostPerYear = _calculatorService.GetDependentsBaseCostPerYear(basePaycheckDto.NumberOfDependents);
 
             if (basePaycheckDto.NumberOfDependentsOverAge > 0)

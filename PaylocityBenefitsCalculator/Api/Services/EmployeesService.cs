@@ -4,6 +4,7 @@ using Api.Dtos.Employee;
 using Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace Api.Services
 {
@@ -40,7 +41,7 @@ namespace Api.Services
                     Data = null,
                     Success = false,
                     Message = $"Employee with Id: {id} does not exist.",
-                    Error = "404"
+                    Error = Constants.ErrorCode.EmployeeNotFound
                 };
 
                 return error;
@@ -139,7 +140,7 @@ namespace Api.Services
                     Data = null,
                     Success = false,
                     Message = $"Employee with Id: {id} does not exist.",
-                    Error = "404"
+                    Error = Constants.ErrorCode.EmployeeNotFound
                 };
 
                 return error;
@@ -206,7 +207,7 @@ namespace Api.Services
                     Data = null,
                     Success = false,
                     Message = $"Employee with Id: {id} does not exist.",
-                    Error = "404"
+                    Error = Constants.ErrorCode.EmployeeNotFound
                 };
 
                 return error;
@@ -239,23 +240,6 @@ namespace Api.Services
 
         public async Task<ApiResponse<AddEmployeeDto>> AddEmployee(AddEmployeeDto newEmployee)
         {
-            //ARE THESE DONE AT MODEL LEVEL????
-            //var validationResult = ValidateNewEmployee(newEmployee);
-
-            //if(validationResult.Valid == false)
-            //{
-            //    var fields = string.Join(", ", validationResult.Fields);
-            //    var error = new ApiResponse<AddEmployeeDto>
-            //    {
-            //        Data = null,
-            //        Success = false,
-            //        Message = $"Could not create Employee. Invalid fields: {fields}.",
-            //        Error = "400"
-            //    };
-
-            //    return error;
-            //}
-
             using var scope = _scopeFactory.CreateScope();
 
             var context = scope.ServiceProvider
@@ -275,8 +259,6 @@ namespace Api.Services
 
             context.Employees.Add(addEmp);
             await context.SaveChangesAsync();
-
-            
 
             //MAYBE THIS LOGIC IN CONTROLLER?
             if (newEmployee.Dependents != null)
@@ -300,8 +282,8 @@ namespace Api.Services
                         {
                             Data = null,
                             Success = false,
-                            Message = $"Unable to add Dependent: ${dependent.FirstName} ${dependent.LastName} for EmployeeId: {addEmp.EmployeeId}",
-                            Error = "400"
+                            Message = dependentServiceResponse.Message,
+                            Error = dependentServiceResponse.Error
                         };
 
                         return error;

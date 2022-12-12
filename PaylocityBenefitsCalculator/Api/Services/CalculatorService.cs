@@ -1,5 +1,6 @@
 ﻿using Api.Data;
 using Api.Dtos.Paycheck;
+using System.Net;
 
 namespace Api.Services
 {
@@ -40,19 +41,19 @@ namespace Api.Services
             decimal baseCostPerPaycheck = paycheckDto.BaseCostPerYear / Constants.CalculatorValues.NumberOfPaychecks;
             decimal netPayPerPaycheck = (paycheckDto.BaseSalary - totalDeductions) / Constants.CalculatorValues.NumberOfPaychecks;
             decimal grossPayPerPaycheck = paycheckDto.BaseSalary / Constants.CalculatorValues.NumberOfPaychecks;
-            decimal baseCostPerDependentPerPaycheck = 0;
-            decimal additionalYearlyDeductionPerPaycheck = 0;
-            decimal additionalDeductionPerDependentPerPaycheck = 0;
+            decimal baseCostPerDependentPerPaycheck = paycheckDto.DependentsBaseCostPerYear / Constants.CalculatorValues.NumberOfPaychecks; 
+            decimal additionalYearlyDeductionPerPaycheck = paycheckDto.AdditionalYearlyCostByPercentage / Constants.CalculatorValues.NumberOfPaychecks;
+            decimal additionalDeductionPerDependentPerPaycheck = paycheckDto.AdditionalDependentsCostByAgePerYear / Constants.CalculatorValues.NumberOfPaychecks;
 
-            //careful with 0/26
-            if (paycheckDto.DependentsBaseCostPerYear > 0)
-                baseCostPerDependentPerPaycheck = paycheckDto.DependentsBaseCostPerYear / Constants.CalculatorValues.NumberOfPaychecks; 
+            //careful with 0/26 DUNNO IF THESE ARE NECESSARY?>??
+            //if (paycheckDto.DependentsBaseCostPerYear > 0)
+            //baseCostPerDependentPerPaycheck = paycheckDto.DependentsBaseCostPerYear / Constants.CalculatorValues.NumberOfPaychecks;
 
-            if (paycheckDto.AdditionalYearlyCostByPercentage > 0)
-                additionalYearlyDeductionPerPaycheck = paycheckDto.AdditionalYearlyCostByPercentage / Constants.CalculatorValues.NumberOfPaychecks; 
+            //if (paycheckDto.AdditionalYearlyCostByPercentage > 0)
+            //additionalYearlyDeductionPerPaycheck = paycheckDto.AdditionalYearlyCostByPercentage / Constants.CalculatorValues.NumberOfPaychecks;
 
-            if (paycheckDto.AdditionalDependentsCostByAgePerYear > 0)
-                additionalDeductionPerDependentPerPaycheck = paycheckDto.AdditionalDependentsCostByAgePerYear / Constants.CalculatorValues.NumberOfPaychecks;
+            //if (paycheckDto.AdditionalDependentsCostByAgePerYear > 0)
+            //additionalDeductionPerDependentPerPaycheck = paycheckDto.AdditionalDependentsCostByAgePerYear / Constants.CalculatorValues.NumberOfPaychecks;
 
             //using jan first 2023 for example, ideally this value can be set by admin 
             var startDate = Constants.CalculatorValues.StartDate;
@@ -86,6 +87,7 @@ namespace Api.Services
 
             return paychecks;
         }
+
     }
 }
 //if these were CPU-bound heavy calculation methods we could use Task.Run to achieve parallelism(using more threads) not asynchronicity(using less threads)

@@ -17,7 +17,8 @@ namespace Api.Services
             _scopeFactory = scopeFactory;
             _paycheckService = paycheckService;
         }
-        public async Task<ApiResponse<GetDependentDto>> Get(int id)
+
+        public async Task<ApiResponse<GetDependentDto>> GetDependentById(int id)
         {
             using var scope = _scopeFactory.CreateScope();
 
@@ -36,7 +37,7 @@ namespace Api.Services
                     Data = null,
                     Success = false,
                     Message = $"Dependent with Id: {id} does not exist.",
-                    Error = "404"
+                    Error = Constants.ErrorCode.DependentNotFound
                 };
 
                 return error;
@@ -60,7 +61,7 @@ namespace Api.Services
             return response;
         }
 
-        public async Task<ApiResponse<List<GetDependentDto>>> GetAll()
+        public async Task<ApiResponse<List<GetDependentDto>>> GetAllDependents()
         {
             using var scope = _scopeFactory.CreateScope();
 
@@ -73,7 +74,15 @@ namespace Api.Services
 
             if (!dependents.Any())
             {
-                //RETURN NO EMPLOYEES FOUDN HERE 
+                var error = new ApiResponse<List<GetDependentDto>>
+                {
+                    Data = null,
+                    Success = false,
+                    Message = $"No Dependents were found.",
+                    Error = Constants.ErrorCode.DependentNotFound
+                };
+
+                return error;
             }
 
             var listDtos = dependents.Select(d => new GetDependentDto
@@ -101,24 +110,24 @@ namespace Api.Services
             var context = scope.ServiceProvider
                 .GetRequiredService<PayrollDbContext>();
 
-            if(newDependent.Relationship == RelationshipType.Spouse || newDependent.Relationship == RelationshipType.DomesticPartner)
+            //find if employee already has a domestic partner or spouse
+            if (newDependent.Relationship == RelationshipType.Spouse || newDependent.Relationship == RelationshipType.DomesticPartner)
             {
-                //find if employee already has a domestic partner or spouse
                 var getSpouseOrDomesticPartner = await context.Dependents
-                    .Where(d => d.EmployeeId == newDependent.EmployeeId && 
-                        d.Relationship == RelationshipType.Spouse || 
+                    .Where(d => d.EmployeeId == newDependent.EmployeeId &&
+                        d.Relationship == RelationshipType.Spouse ||
                         d.Relationship == RelationshipType.DomesticPartner)
                     .AsNoTracking()
                     .SingleOrDefaultAsync();
 
-                if(getSpouseOrDomesticPartner != null)
+                if (getSpouseOrDomesticPartner != null)
                 {
                     var error = new ApiResponse<AddDependentWithEmployeeIdDto>
                     {
                         Data = null,
                         Success = false,
-                        Message = $"Employee Id {newDependent.EmployeeId} already has a Spouse or Domestic Partner",
-                        Error = "404"
+                        Message = $"Employee Id: {newDependent.EmployeeId} already has a Spouse or Domestic Partner",
+                        Error = Constants.ErrorCode.InvalidParameter
                     };
 
                     return error;
@@ -138,13 +147,22 @@ namespace Api.Services
             await context.SaveChangesAsync();
 
             //recalculate paychecks
-            await _paycheckService.GeneratePaychecksForEmployeeId(addDependent.EmployeeId);
+            var generatePaychecksResponse = await _paycheckService.GeneratePaychecksForEmployeeId(addDependent.EmployeeId);
 
-            var response = new ApiResponse<AddDependentWithEmployeeIdDto>
+            var response = new ApiResponse<AddDependentWithEmployeeIdDto>();
+
+            if (generatePaychecksResponse.Success == false)
             {
-                Data = newDependent,
-                Success = true
-            };
+                response.Data = null;
+                response.Success = false;
+                response.Message = generatePaychecksResponse.Message;
+                response.Error = generatePaychecksResponse.Error;
+
+                return response;
+            }
+
+            response.Data = newDependent;
+            response.Success = true;
 
             return response;
         }
@@ -167,7 +185,7 @@ namespace Api.Services
                     Data = null,
                     Success = false,
                     Message = $"Dependent with Id: {id} does not exist.",
-                    Error = "404"
+                    Error = Constants.ErrorCode.DependentNotFound
                 };
 
                 return error;
@@ -181,7 +199,19 @@ namespace Api.Services
             await context.SaveChangesAsync();
 
             //recalculate paychecks
-            await _paycheckService.GeneratePaychecksForEmployeeId(dependent.EmployeeId);
+            var generatePaychecksResponse = await _paycheckService.GeneratePaychecksForEmployeeId(dependent.EmployeeId);
+
+            var response = new ApiResponse<GetDependentDto>();
+
+            if (generatePaychecksResponse.Success == false)
+            {
+                response.Data = null;
+                response.Success = false;
+                response.Message = generatePaychecksResponse.Message;
+                response.Error = generatePaychecksResponse.Error;
+
+                return response;
+            }
 
             var dto = new GetDependentDto
             {
@@ -192,11 +222,8 @@ namespace Api.Services
                 Relationship = dependent.Relationship
             };
 
-            var response = new ApiResponse<GetDependentDto>
-            {
-                Data = dto,
-                Success = true
-            };
+            response.Data = dto;
+            response.Success = true;
 
             return response;
         }
@@ -219,7 +246,7 @@ namespace Api.Services
                     Data = null,
                     Success = false,
                     Message = $"Dependent with Id: {id} does not exist.",
-                    Error = "404"
+                    Error = Constants.ErrorCode.DependentNotFound
                 };
 
                 return error;
@@ -229,7 +256,19 @@ namespace Api.Services
             await context.SaveChangesAsync();
 
             //recalculate paychecks
-            await _paycheckService.GeneratePaychecksForEmployeeId(dependent.EmployeeId);
+            var generatePaychecksResponse = await _paycheckService.GeneratePaychecksForEmployeeId(dependent.EmployeeId);
+
+            var response = new ApiResponse<GetDependentDto>();
+
+            if (generatePaychecksResponse.Success == false)
+            {
+                response.Data = null;
+                response.Success = false;
+                response.Message = generatePaychecksResponse.Message;
+                response.Error = generatePaychecksResponse.Error;
+
+                return response;
+            }
 
             var dto = new GetDependentDto
             {
@@ -240,11 +279,8 @@ namespace Api.Services
                 Relationship = dependent.Relationship
             };
 
-            var response = new ApiResponse<GetDependentDto>
-            {
-                Data = dto,
-                Success = true
-            };
+            response.Data = dto;
+            response.Success = true;
 
             return response;
         }
