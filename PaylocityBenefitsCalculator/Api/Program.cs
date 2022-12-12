@@ -21,6 +21,8 @@ builder.Services.AddSwaggerGen(c => {
     });
 });
 
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
 builder.Services.AddDbContext<PayrollDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("PayrollDbConnection"));

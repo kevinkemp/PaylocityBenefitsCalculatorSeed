@@ -61,10 +61,10 @@ namespace ApiTests.System.Controllers
 
             var sut = new DependentsController(dependentsService.Object);
 
-            /////Act
+            ///Act
             var result = await sut.AddDependent(addSpouse);
 
-            /////Assert
+            ///Assert
             result.GetType().Should().Be(typeof(ActionResult<ApiResponse<AddDependentWithEmployeeIdDto>>));
             result.Value.Success.Should().BeTrue();
         }
@@ -79,10 +79,10 @@ namespace ApiTests.System.Controllers
 
             var sut = new DependentsController(dependentsService.Object);
 
-            /////Act
+            ///Act
             var actionResult = await sut.AddDependent(addSpouse);
 
-            /////Assert
+            ///Assert
             var result = actionResult.Result as BadRequestObjectResult;
             result.Should().NotBeNull();
             result.StatusCode.Should().Be(400);
