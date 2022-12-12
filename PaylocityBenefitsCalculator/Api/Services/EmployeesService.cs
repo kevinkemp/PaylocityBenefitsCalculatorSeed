@@ -90,7 +90,14 @@ namespace Api.Services
 
             if (!employees.Any())
             {
-                //RETURN NO EMPLOYEES FOUDN HERE 
+                var error = new ApiResponse<List<GetEmployeeDto>>
+                {
+                    Success = false,
+                    Error = Constants.ErrorCode.EmployeeNotFound,
+                    Message = "No Employees found"
+                };
+
+                return error;
             }
 
             var listDtos = employees.Select(e => new GetEmployeeDto

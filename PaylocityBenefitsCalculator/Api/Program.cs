@@ -21,18 +21,19 @@ builder.Services.AddSwaggerGen(c => {
     });
 });
 
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
+//ideally add automapper
+//builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddDbContext<PayrollDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("PayrollDbConnection"));
 });
 
-//SHOULD THESE BE SINGLETONS? TRANSIENTS?
-builder.Services.AddSingleton<ICalculatorService, CalculatorService>();
-builder.Services.AddSingleton<IPaycheckService, PaycheckService>();
-builder.Services.AddSingleton<IDependentsService, DependentsService>();
-builder.Services.AddSingleton<IEmployeesService, EmployeesService>();
+//transients, services instanced when needed
+builder.Services.AddTransient<ICalculatorService, CalculatorService>();
+builder.Services.AddTransient<IPaycheckService, PaycheckService>();
+builder.Services.AddTransient<IDependentsService, DependentsService>();
+builder.Services.AddTransient<IEmployeesService, EmployeesService>();
 
 var allowLocalhost = "allow localhost";
 builder.Services.AddCors(options =>

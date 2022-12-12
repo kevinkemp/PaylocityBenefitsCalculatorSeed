@@ -42,9 +42,16 @@ namespace Api.Controllers
         [HttpGet("")]
         public async Task<ActionResult<ApiResponse<List<GetEmployeeDto>>>> GetAll()
         {
-            var getAllEmployeesResponse = await _employeeService.GetAll();
+            var response = await _employeeService.GetAll();
 
-            return getAllEmployeesResponse;
+            if (response.Success == false)
+            {
+                var statusCode = Constants.ErrorDictionary.GetHttpError()[response.Error];
+
+                return HttpErrorGenerator(statusCode, response.Message);
+            }
+
+            return response;
         }
 
         [SwaggerOperation(Summary = "Add employee")]
